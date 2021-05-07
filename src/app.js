@@ -21,16 +21,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(cors());
 app.use(cookieParser());
-
 loggerLoader(app);
 
 app.use("/", rootRouter);
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 

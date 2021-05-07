@@ -5,7 +5,7 @@ mongoose.connect(process.env.MONGO_ATLAS, {
   useUnifiedTopology: true,
   useCreateIndex: true,
   useFindAndModify: false,
-}).then(result => result.connection.getClient());
+}).then((result) => result.connection.getClient());
 
 const db = mongoose.connection;
 let url = null;
