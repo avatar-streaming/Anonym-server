@@ -5,10 +5,10 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const createError = require("http-errors");
 const helmet = require("helmet");
-const logger = require("morgan");
 const path = require("path");
 
 const rootRouter = require("./routes/rootRouter");
+const loggerLoader = require("./loaders/logger");
 
 const app = express();
 
@@ -20,8 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(cors());
-app.use(logger("dev"));
 app.use(cookieParser());
+
+loggerLoader(app);
 
 app.use("/", rootRouter);
 
