@@ -1,12 +1,12 @@
 const express = require("express");
+const { getStreamings } = require("../controllers/streamings");
+
 const router = express.Router();
 
 const root = (app) => {
   app.use("/", router);
 
-  router.get("/", (req, res) => {
-    res.send("Hello World!");
-  });
+  router.get("/", getStreamings);
 };
 
 module.exports = root;

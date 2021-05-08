@@ -1,5 +1,6 @@
 const express = require("express");
 const { postLogin, postCheckAuth } = require("../controllers/auth");
+
 const router = express.Router();
 
 const auth = (app) => {
