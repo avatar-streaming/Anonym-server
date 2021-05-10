@@ -5,10 +5,7 @@ exports.postLogin = async (req, res, next) => {
     const userInfo = req.body;
     const { status, message, user, token } = await AuthService.login(userInfo);
 
-    res.set("token", token, {
-      httpOnly: true,
-      secure: true,
-    });
+    res.cookie("jwt", token);
     res.status(status).json({
       message,
       user,

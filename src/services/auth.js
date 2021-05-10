@@ -2,6 +2,7 @@ const User = require("../model/User");
 const { generateToken, verifyToken } = require("../utils/tokenHelper");
 
 exports.checkAuth = async (bearerHeader) => {
+  console.log(bearerHeader)
   try {
     const bearer = bearerHeader.split(" ");
     const bearerToken = bearer[1];
