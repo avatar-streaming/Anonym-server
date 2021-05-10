@@ -59,3 +59,10 @@ exports.login = async (userInfo) => {
     throw new Error(err);
   }
 };
+
+exports.logout = () => {
+  return {
+    status: 200,
+    message: "Log Out Success",
+  };
+};

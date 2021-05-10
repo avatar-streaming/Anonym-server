@@ -1,6 +1,6 @@
 const AuthService = require("../../services/auth");
 
-exports.postLogin = async (req, res, next) => {
+exports.login = async (req, res, next) => {
   try {
     const userInfo = req.body;
     const { status, message, user, token } = await AuthService.login(userInfo);
@@ -10,6 +10,19 @@ exports.postLogin = async (req, res, next) => {
       message,
       user,
       token,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.logout = async (req, res, next) => {
+  try {
+    const { status, message } = AuthService.logout();
+
+    res.clearCookie("jwt");
+    res.status(status).json({
+      message,
     });
   } catch (err) {
     next(err);
