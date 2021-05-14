@@ -33,7 +33,7 @@ exports.generateStreaming = async (streamerId, title) => {
 
 exports.removeStreaming = async (streamerId) => {
   try {
-    await Streaming.deleteOne({ streamer: streamerId });
+    await Streaming.deleteMany({ streamer: streamerId });
 
     return {
       status: 200,
