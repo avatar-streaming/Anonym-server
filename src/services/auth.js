@@ -6,7 +6,7 @@ exports.checkAuth = async (bearerHeader) => {
     const bearer = bearerHeader.split(" ");
     const bearerToken = bearer[1];
     const decodedToken = await verifyToken(bearerToken);
-    const user = await User.findOne({ uid: decodedToken.uid });
+    const user = await User.findOne({ uid: decodedToken.uid }).lean();
     const now = Date.now();
     const isExpired = decodedToken.exp * 1000 - now < 0;
 
@@ -30,7 +30,7 @@ exports.checkAuth = async (bearerHeader) => {
 exports.login = async (userInfo) => {
   try {
     const { uid, email, displayName } = userInfo;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     const token = await generateToken(uid);
 
     if (!user) {
@@ -38,7 +38,7 @@ exports.login = async (userInfo) => {
         uid,
         email,
         userName: displayName,
-      });
+      }).lean();
 
       return {
         status: 201,
@@ -58,3 +58,8 @@ exports.login = async (userInfo) => {
     throw new Error(err);
   }
 };
+
+exports.logout = () => ({
+  status: 200,
+  message: "Log Out Success",
+});
