@@ -1,5 +1,5 @@
 const express = require("express");
-const StremingController = require("../controllers/streamings");
+const StremingController = require("../controllers/streaming");
 
 const router = express.Router();
 

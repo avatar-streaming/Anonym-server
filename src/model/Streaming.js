@@ -6,10 +6,11 @@ const streamingSchema = new Schema({
     type: String,
     required: true,
   },
-  stremer: {
+  streamer: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
     ref: "User",
+    required: true,
+    unique: true,
   },
   thumnail: {
     type: String,

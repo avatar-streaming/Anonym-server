@@ -29,9 +29,9 @@ exports.logout = async (req, res, next) => {
   }
 };
 
-exports.postCheckAuth = async (req, res, next) => {
+exports.checkAuth = async (req, res, next) => {
   try {
-    const bearerHeader = req.headers["authentication"];
+    const bearerHeader = req.headers.authentication;
     const { status, message, user } = await AuthService.checkAuth(bearerHeader);
 
     if (!user) {
@@ -47,7 +47,6 @@ exports.postCheckAuth = async (req, res, next) => {
       user,
     });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
