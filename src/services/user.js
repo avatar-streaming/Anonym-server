@@ -15,3 +15,17 @@ exports.updateUserName = async (id, userName) => {
     throw new Error(err);
   }
 };
+
+exports.searchUsers = async (searchTerm) => {
+  try {
+    const userList = await User.find({ userName: { $regex: searchTerm } });
+
+    return {
+      status: 200,
+      message: "Search UserList Success",
+      userList,
+    };
+  } catch (err) {
+    throw new Error(err);
+  }
+};
