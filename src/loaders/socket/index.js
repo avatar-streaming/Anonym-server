@@ -19,6 +19,7 @@ const pc_config = {
     }
   ],
 };
+const intervalIDs = {};
 
 const createReceiverPeerConnection = (socket, socketID, roomID) => {
   const pc = new wrtc.RTCPeerConnection(pc_config);
@@ -35,17 +36,15 @@ const createReceiverPeerConnection = (socket, socketID, roomID) => {
       id: socketID,
       stream: event.streams[0],
     };
+  };
 
   pc.ondatachannel = (event) => {
     console.log("receive ondatachannel");
     const dc = event.channel;
 
     dc.onmessage = (event) => {
-      console.log("onmessage data", event.data);
       streamings[roomID].image = event.data;
     };
-  };
-    // socket.broadcast.to(roomID).emit("userEnter", { id: socketID, roomID });
   };
 
   return pc;
@@ -73,17 +72,16 @@ const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, ro
     pc.addTrack(track, targetStreaming.stream);
   });
 
-  const dc = pc.createDataChannel("image data");
-  console.log("create channel");
-  dc.onopen = () => {
-    console.log("channel open");
-    dc.send("2");
+  pc.ondatachannel = (event) => {
+    const dc = event.channel;
+
+    intervalIDs[receiverSocketID] = setInterval(() => {
+      dc.send(streamings[roomID].image);
+    }, 100);
   };
 
   return pc;
 };
-
-/////////////////////////////////////////////
 
 io.on("connection", (socket) => {
   socket.on("join room", (roomID) => {
@@ -96,10 +94,6 @@ io.on("connection", (socket) => {
 
   socket.on("leave room", (roomID) => {
     socket.leave(roomID);
-    console.log('socket id', socket.id);
-    console.log('receiverpc', receiverPCs);
-    console.log('senderPCs', senderPCs);
-    console.log('streamings', streamings);
   });
 
   socket.on("join streaming", ({ id, roomID }) => {
