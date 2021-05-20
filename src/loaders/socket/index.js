@@ -11,25 +11,13 @@ const io = new Server(server, {
 
 const receiverPCs = {};
 let senderPCs = {};
-const users = {};
+const streamings = {};
 const pc_config = {
   "iceServers": [
     {
       urls: "stun:stun.l.google.com:19302",
     }
   ],
-};
-
-const isIncluded = (array, id) => {
-  const length = array.length;
-
-  for (let i = 0; i < length; i++) {
-    if (array[i].id === id) {
-      return true;
-    }
-  }
-
-  return false;
 };
 
 const createReceiverPeerConnection = (socket, socketID, roomID) => {
@@ -43,23 +31,21 @@ const createReceiverPeerConnection = (socket, socketID, roomID) => {
   };
 
   pc.ontrack = (event) => {
-    if (users[roomID]) {
-      if (isIncluded(users[roomID], socketID)) {
-        return;
-      }
+    streamings[roomID] = {
+      id: socketID,
+      stream: event.streams[0],
+    };
 
-      users[roomID].push({
-        id: socketID,
-        stream: event.streams[0],
-      });
-    } else {
-      users[roomID] = [{
-        id: socketID,
-        stream: event.streams[0],
-      }];
-    }
+  pc.ondatachannel = (event) => {
+    console.log("receive ondatachannel");
+    const dc = event.channel;
 
-    socket.broadcast.to(roomID).emit("userEnter", { id: socketID, roomID });
+    dc.onmessage = (event) => {
+      console.log("onmessage data", event.data);
+      streamings[roomID].image = event.data;
+    };
+  };
+    // socket.broadcast.to(roomID).emit("userEnter", { id: socketID, roomID });
   };
 
   return pc;
@@ -72,7 +58,7 @@ const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, ro
     senderPCs[senderSocketID] = senderPCs[senderSocketID].filter(user => user.id !== receiverSocketID);
     senderPCs[senderSocketID].push({ id: receiverSocketID, pc });
   } else {
-    senderPCs = {...senderPCs, [senderSocketID]: [{ id: receiverSocketID, pc }]};
+    senderPCs[senderSocketID] = [{ id: receiverSocketID, pc }];
   }
 
   pc.onicecandidate = (event) => {
@@ -82,32 +68,19 @@ const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, ro
     });
   };
 
-  const sendUser = users[roomID].filter(user => user.id === senderSocketID);
-  sendUser[0].stream.getTracks().forEach(track => {
-    pc.addTrack(track, sendUser[0].stream);
+  const targetStreaming = streamings[roomID];
+  targetStreaming.stream.getTracks().forEach(track => {
+    pc.addTrack(track, targetStreaming.stream);
   });
 
+  const dc = pc.createDataChannel("image data");
+  console.log("create channel");
+  dc.onopen = () => {
+    console.log("channel open");
+    dc.send("2");
+  };
+
   return pc;
-};
-
-const getOtherUsersInRoom = (socketID, roomID) => {
-  const allUsers = [];
-
-  if (!users[roomID]) {
-    return allUsers;
-  }
-
-  const length = users[roomID].length;
-
-  for (let i = 0; i < length; i++) {
-    if (users[roomID][i].id === socketID) {
-      continue;
-    }
-
-    allUsers.push({ id: users[roomID][i].id });
-  }
-
-  return allUsers;
 };
 
 /////////////////////////////////////////////
@@ -126,13 +99,13 @@ io.on("connection", (socket) => {
     console.log('socket id', socket.id);
     console.log('receiverpc', receiverPCs);
     console.log('senderPCs', senderPCs);
-    console.log('users', users);
+    console.log('streamings', streamings);
   });
 
   socket.on("join streaming", ({ id, roomID }) => {
     try {
-      const allUsers = getOtherUsersInRoom(id, roomID);
-      io.to(id).emit("allUsers", { users: allUsers, roomID });
+      const streamerID = streamings[roomID].id;
+      io.to(id).emit("receive streaming", { streamerID, roomID });
     } catch (error) {
       console.log(error);
     }
