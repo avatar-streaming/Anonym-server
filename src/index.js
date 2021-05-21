@@ -1,7 +1,13 @@
-const app = require("./app");
+const server = require("./loaders/socket");
+require("./loaders/db");
+require("./loaders/socket");
 
 const handleListening = () => {
   console.log(`✅ Listening on: http://localhost:${process.env.PORT}`);
 };
 
-app.listen(process.env.PORT, handleListening);
+server
+  .listen(process.env.PORT, handleListening)
+  .on("error", (err) => {
+    console.log(err);
+  });
