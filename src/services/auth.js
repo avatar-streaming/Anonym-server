@@ -29,7 +29,7 @@ exports.checkAuth = async (bearerHeader) => {
 
 exports.login = async (userInfo) => {
   try {
-    const { uid, email, displayName } = userInfo;
+    const { uid, email, displayName, photoURL } = userInfo;
     const user = await User.findOne({ email }).lean();
     const token = await generateToken(uid);
 
@@ -38,6 +38,7 @@ exports.login = async (userInfo) => {
         uid,
         email,
         userName: displayName,
+        thumnail: photoURL,
       }).lean();
 
       return {

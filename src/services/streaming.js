@@ -14,11 +14,12 @@ exports.getStreamings = async () => {
   }
 };
 
-exports.generateStreaming = async (streamerId, title) => {
+exports.generateStreaming = async (streamerId, title, thumnail) => {
   try {
     const streaming = await Streaming.create({
       streamer: streamerId,
       title,
+      thumnail,
     });
 
     return {
@@ -33,7 +34,7 @@ exports.generateStreaming = async (streamerId, title) => {
 
 exports.removeStreaming = async (streamerId) => {
   try {
-    await Streaming.deleteOne({ streamer: streamerId });
+    await Streaming.deleteMany({ streamer: streamerId });
 
     return {
       status: 200,

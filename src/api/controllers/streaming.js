@@ -15,13 +15,13 @@ exports.getStreamings = async (req, res, next) => {
 
 exports.generateStreaming = async (req, res, next) => {
   try {
-    const { streamingTitle } = req.body;
+    const { streamingTitle, streamingThumnail } = req.body;
     const { id: streamingId } = req.params;
     const {
       status,
       message,
       streaming,
-    } = await StreamingService.generateStreaming(streamingId, streamingTitle);
+    } = await StreamingService.generateStreaming(streamingId, streamingTitle, streamingThumnail);
 
     res.status(status).json({
       message,
