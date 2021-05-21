@@ -14,11 +14,12 @@ exports.getStreamings = async () => {
   }
 };
 
-exports.generateStreaming = async (streamerId, title) => {
+exports.generateStreaming = async (streamerId, title, thumnail) => {
   try {
     const streaming = await Streaming.create({
       streamer: streamerId,
       title,
+      thumnail,
     });
 
     return {
