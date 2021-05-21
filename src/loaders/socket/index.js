@@ -10,7 +10,7 @@ const io = new Server(server, {
 });
 
 const receiverPCs = {};
-let senderPCs = {};
+const senderPCs = {};
 const streamings = {};
 const pc_config = {
   "iceServers": [
@@ -19,68 +19,73 @@ const pc_config = {
     }
   ],
 };
-const intervalIDs = {};
 
-const createReceiverPeerConnection = (socket, socketID, roomID) => {
-  const pc = new wrtc.RTCPeerConnection(pc_config);
-  receiverPCs[socketID] = pc;
+const createReceiverPeerConnection = (socket, streamerID, roomID) => {
+  try {
+    const pc = new wrtc.RTCPeerConnection(pc_config);
+    receiverPCs[streamerID] = pc;
 
-  pc.onicecandidate = (event) => {
-    socket.to(socketID).emit("getSenderCandidate", {
-      candidate: event.candidate,
-    });
-  };
-
-  pc.ontrack = (event) => {
-    streamings[roomID] = {
-      id: socketID,
-      stream: event.streams[0],
+    pc.onicecandidate = (event) => {
+      socket.to(streamerID).emit("getSenderCandidate", {
+        candidate: event.candidate,
+      });
     };
-  };
 
-  pc.ondatachannel = (event) => {
-    console.log("receive ondatachannel");
-    const dc = event.channel;
-
-    dc.onmessage = (event) => {
-      streamings[roomID].image = event.data;
+    pc.ontrack = (event) => {
+      streamings[roomID] = {
+        id: streamerID,
+        stream: event.streams[0],
+      };
     };
-  };
 
-  return pc;
+    pc.ondatachannel = (event) => {
+      const dc = event.channel;
+
+      dc.onmessage = (event) => {
+        streamings[roomID].image = event.data;
+      };
+    };
+
+    return pc;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-const createSenderPeerConnection = (receiverSocketID, senderSocketID, socket, roomID) => {
-  const pc = new wrtc.RTCPeerConnection(pc_config);
+const createSenderPeerConnection = (viewerID, socket, roomID) => {
+  try {
+    const pc = new wrtc.RTCPeerConnection(pc_config);
+    senderPCs[viewerID] = pc;
 
-  if (senderPCs[senderSocketID]) {
-    senderPCs[senderSocketID] = senderPCs[senderSocketID].filter(user => user.id !== receiverSocketID);
-    senderPCs[senderSocketID].push({ id: receiverSocketID, pc });
-  } else {
-    senderPCs[senderSocketID] = [{ id: receiverSocketID, pc }];
-  }
+    pc.onicecandidate = (event) => {
+      socket.to(viewerID).emit("getReceiverCandidate", {
+        viewerID,
+        candidate: event.candidate,
+      });
+    };
 
-  pc.onicecandidate = (event) => {
-    socket.to(receiverSocketID).emit("getReceiverCandidate", {
-      id: senderSocketID,
-      candidate: event.candidate,
+    const targetStreaming = streamings[roomID];
+
+    targetStreaming.stream.getTracks().forEach(track => {
+      pc.addTrack(track, targetStreaming.stream);
     });
-  };
 
-  const targetStreaming = streamings[roomID];
-  targetStreaming.stream.getTracks().forEach(track => {
-    pc.addTrack(track, targetStreaming.stream);
-  });
+    pc.ondatachannel = (event) => {
+      const dc = event.channel;
 
-  pc.ondatachannel = (event) => {
-    const dc = event.channel;
+      dc.onmessage = (event) => {
+        const target = streamings[roomID];
 
-    intervalIDs[receiverSocketID] = setInterval(() => {
-      dc.send(streamings[roomID].image);
-    }, 100);
-  };
+        if (target) {
+          dc.send(target.image);
+        }
+      };
+    };
 
-  return pc;
+    return pc;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 io.on("connection", (socket) => {
@@ -96,55 +101,77 @@ io.on("connection", (socket) => {
     socket.leave(roomID);
   });
 
-  socket.on("join streaming", ({ id, roomID }) => {
+  socket.on("join streaming", ({ viewerID, roomID }) => {
     try {
-      const streamerID = streamings[roomID].id;
-      io.to(id).emit("receive streaming", { streamerID, roomID });
+      io.to(viewerID).emit("receive streaming", { roomID });
     } catch (error) {
       console.log(error);
     }
   });
 
-  socket.on("senderCandidate", async ({ senderSocketID, candidate }) => {
+  socket.on("leave streaming", ({ viewerID }) => {
     try {
-      const pc = receiverPCs[senderSocketID];
+      senderPCs[viewerID].close();
+      delete senderPCs[viewerID];
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  socket.on("end streaming", ({ streamerID, roomID }) => {
+    try {
+      receiverPCs[streamerID].close();
+      delete receiverPCs[streamerID];
+
+      streamings[roomID].stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      delete streamings[roomID];
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  socket.on("senderCandidate", async ({ streamerID, candidate }) => {
+    try {
+      const pc = receiverPCs[streamerID];
       await pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
     } catch (error) {
       console.log(error);
     }
   });
 
-  socket.on("senderOffer", async ({ senderSdp, senderSocketID, roomID }) => {
+  socket.on("senderOffer", async ({ remoteSdp, streamerID, roomID }) => {
     try {
-      const pc = createReceiverPeerConnection(socket, senderSocketID, roomID);
-      await pc.setRemoteDescription(senderSdp);
+      const pc = createReceiverPeerConnection(socket, streamerID, roomID);
+      await pc.setRemoteDescription(remoteSdp);
 
       const sdp = await pc.createAnswer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: true,
+        offerToReceiveVideo: false,
       });
       await pc.setLocalDescription(sdp);
 
       socket.join(roomID);
-      io.to(senderSocketID).emit("getSenderAnswer", { sdp });
+      io.to(streamerID).emit("getSenderAnswer", { sdp });
     } catch (error) {
       console.log(error);
     }
   });
 
-  socket.on("receiverCandidate", async ({ senderSocketID, receiverSocketID, candidate }) => {
+  socket.on("receiverCandidate", async ({ viewerID, candidate }) => {
     try {
-      const senderPC = senderPCs[senderSocketID].filter(senderPC => senderPC.id === receiverSocketID);
-      await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
+      const senderPC = senderPCs[viewerID];
+      await senderPC.addIceCandidate(new wrtc.RTCIceCandidate(candidate));
     } catch (error) {
       console.log(error);
     }
   });
 
-  socket.on("receiverOffer", async ({ receiverSdp, receiverSocketID, senderSocketID, roomID }) => {
+  socket.on("receiverOffer", async ({ remoteSdp, viewerID, roomID }) => {
     try {
-      const pc = createSenderPeerConnection(receiverSocketID, senderSocketID, socket, roomID);
-      await pc.setRemoteDescription(receiverSdp);
+      const pc = createSenderPeerConnection(viewerID, socket, roomID);
+      await pc.setRemoteDescription(remoteSdp);
 
       const sdp = await pc.createAnswer({
         offerToReceiveAudio: false,
@@ -152,7 +179,7 @@ io.on("connection", (socket) => {
       });
       await pc.setLocalDescription(sdp);
 
-      io.to(receiverSocketID).emit("getReceiverAnswer", { id: senderSocketID, sdp });
+      io.to(viewerID).emit("getReceiverAnswer", { viewerID, sdp });
     } catch (error) {
       console.log(error);
     }
