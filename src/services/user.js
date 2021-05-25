@@ -29,3 +29,23 @@ exports.searchUsers = async (searchTerm) => {
     throw new Error(err);
   }
 };
+
+exports.followUser = async (userID, targetID) => {
+  try {
+    const currentUser = await User.findOne({ _id: userID });
+    const targetUser = await User.findOne({ _id: targetID });
+
+    currentUser.followings.addToSet(targetUser);
+    await currentUser.save();
+    targetUser.followers.addToSet(currentUser);
+    await targetUser.save();
+
+    return {
+      status: 201,
+      message: "Follow User Success",
+      currentUser,
+    };
+  } catch (err) {
+    throw new Error(err);
+  }
+};

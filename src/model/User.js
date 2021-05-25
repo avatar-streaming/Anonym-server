@@ -22,14 +22,22 @@ const userSchema = new Schema({
   thumnail: {
     type: String,
   },
-  follower: [{
+  followers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
-  following: [{
+  followings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
 });
 
-module.exports = mongoose.model("User", userSchema);
+const autoPopulate = function(next) {
+  this.populate("followings");
+  next();
+};
+userSchema.pre(/^find/, autoPopulate);
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

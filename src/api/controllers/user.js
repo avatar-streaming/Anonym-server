@@ -28,3 +28,18 @@ exports.searchUsers = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.followUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { targetID } = req.body;
+    const { status, message, currentUser } = await UserService.followUser(id, targetID);
+
+    res.status(status).json({
+      message,
+      currentUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

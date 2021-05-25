@@ -6,7 +6,7 @@ exports.checkAuth = async (bearerHeader) => {
     const bearer = bearerHeader.split(" ");
     const bearerToken = bearer[1];
     const decodedToken = await verifyToken(bearerToken);
-    const user = await User.findOne({ uid: decodedToken.uid }).lean();
+    const user = await User.findOne({ uid: decodedToken.uid });
     const now = Date.now();
     const isExpired = decodedToken.exp * 1000 - now < 0;
 
@@ -30,7 +30,7 @@ exports.checkAuth = async (bearerHeader) => {
 exports.login = async (userInfo) => {
   try {
     const { uid, email, displayName, photoURL } = userInfo;
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
     const token = await generateToken(uid);
 
     if (!user) {
@@ -39,7 +39,7 @@ exports.login = async (userInfo) => {
         email,
         userName: displayName,
         thumnail: photoURL,
-      }).lean();
+      });
 
       return {
         status: 201,
