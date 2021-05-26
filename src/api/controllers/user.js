@@ -8,7 +8,7 @@ exports.updateUserName = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      user,
+      payload: user,
     });
   } catch (err) {
     next(err);
@@ -22,7 +22,7 @@ exports.searchUsers = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      userList,
+      payload: userList,
     });
   } catch (err) {
     next(err);
@@ -37,7 +37,7 @@ exports.followUser = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      currentUser,
+      payload: currentUser,
     });
   } catch (err) {
     next(err);

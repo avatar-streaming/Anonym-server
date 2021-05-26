@@ -30,7 +30,7 @@ exports.checkAuth = async (bearerHeader) => {
 exports.login = async (userInfo) => {
   try {
     const { uid, email, displayName, photoURL } = userInfo;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("followings", "userName thumnail").lean();
     const token = await generateToken(uid);
 
     if (!user) {
