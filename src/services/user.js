@@ -37,6 +37,7 @@ exports.followUser = async (userID, targetID) => {
 
     currentUser.followings.addToSet(targetUser);
     await currentUser.save();
+    await currentUser.populate("followings", "userName thumnail").execPopulate();
     targetUser.followers.addToSet(currentUser);
     await targetUser.save();
 

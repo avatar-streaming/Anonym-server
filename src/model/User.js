@@ -16,7 +16,6 @@ const userSchema = new Schema({
   userName: {
     type: String,
     lowercase: true,
-    unique: true,
     required: true,
   },
   thumnail: {
@@ -31,12 +30,6 @@ const userSchema = new Schema({
     ref: "User",
   }],
 });
-
-const autoPopulate = function(next) {
-  this.populate("followings");
-  next();
-};
-userSchema.pre(/^find/, autoPopulate);
 
 const User = mongoose.model("User", userSchema);
 

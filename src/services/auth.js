@@ -6,7 +6,7 @@ exports.checkAuth = async (bearerHeader) => {
     const bearer = bearerHeader.split(" ");
     const bearerToken = bearer[1];
     const decodedToken = await verifyToken(bearerToken);
-    const user = await User.findOne({ uid: decodedToken.uid });
+    const user = await User.findOne({ uid: decodedToken.uid }).populate("followings", "userName thumnail").lean();
     const now = Date.now();
     const isExpired = decodedToken.exp * 1000 - now < 0;
 
