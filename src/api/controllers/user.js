@@ -43,3 +43,18 @@ exports.followUser = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.unfollowUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { targetID } = req.body;
+    const { status, message, currentUser } = await UserService.unfollowUser(id, targetID);
+
+    res.status(status).json({
+      message,
+      payload: currentUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

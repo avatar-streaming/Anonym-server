@@ -50,3 +50,24 @@ exports.followUser = async (userID, targetID) => {
     throw new Error(err);
   }
 };
+
+exports.unfollowUser = async (userID, targetID) => {
+  try {
+    const currentUser = await User.findOne({ _id: userID });
+    const targetUser = await User.findOne({ _id: targetID });
+
+    currentUser.followings.pull(targetUser);
+    await currentUser.save();
+    await currentUser.populate("followings", "userName thumnail").execPopulate();
+    targetUser.followers.pull(currentUser);
+    await targetUser.save();
+
+    return {
+      status: 201,
+      message: "Follow User Success",
+      currentUser,
+    };
+  } catch (err) {
+    throw new Error(err);
+  }
+};
