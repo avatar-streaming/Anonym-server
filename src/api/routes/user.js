@@ -6,7 +6,9 @@ const router = express.Router();
 const user = (app) => {
   app.use("/user", router);
 
-  router.put("/:id", UserController.updateUserName);
+  router.put("/userName/:id", UserController.updateUserName);
+  router.put("/follow/:id", UserController.followUser);
+  router.put("/unfollow/:id", UserController.unfollowUser);
 };
 
 module.exports = user;

@@ -8,8 +8,7 @@ exports.login = async (req, res, next) => {
     res.cookie("jwt", token);
     res.status(status).json({
       message,
-      user,
-      token,
+      payload: user,
     });
   } catch (err) {
     next(err);
@@ -44,7 +43,7 @@ exports.checkAuth = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      user,
+      payload: user,
     });
   } catch (err) {
     next(err);

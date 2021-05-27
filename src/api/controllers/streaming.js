@@ -6,7 +6,7 @@ exports.getStreamings = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      streamings,
+      payload: streamings,
     });
   } catch (err) {
     next(err);
@@ -25,7 +25,7 @@ exports.generateStreaming = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      streaming,
+      payload: streaming,
     });
   } catch (err) {
     next(err);
