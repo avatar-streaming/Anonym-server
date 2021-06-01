@@ -15,6 +15,21 @@ exports.updateUserName = async (req, res, next) => {
   }
 };
 
+exports.updateUserThumnail = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { userThumnail } = req.body;
+    const { status, message, user } = await UserService.updateUserThumnail(id, userThumnail);
+
+    res.status(status).json({
+      message,
+      payload: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.searchUsers = async (req, res, next) => {
   try {
     const { term } = req.query;

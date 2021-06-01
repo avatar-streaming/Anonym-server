@@ -5,9 +5,10 @@ exports.updateUserName = async (id, userName) => {
     const filter = { _id: id };
     const update = { userName };
     const user = await User.findOneAndUpdate(filter, update, { new: true });
+    await user.populate("followings", "userName thumnail").execPopulate();
 
     return {
-      status: 200,
+      status: 201,
       message: "Update UserName Success",
       user,
     };
@@ -16,6 +17,22 @@ exports.updateUserName = async (id, userName) => {
   }
 };
 
+exports.updateUserThumnail = async (id, userThumnail) => {
+  try {
+    const filter = { _id: id };
+    const update = { userThumnail };
+    const user = await User.findOneAndUpdate(filter, update, { new: true });
+    await user.populate("followings", "userName thumnail").execPopulate();
+
+    return {
+      status: 201,
+      message: "Update UserName Success",
+      user,
+    };
+  } catch (err) {
+    throw new Error(err);
+  }
+}
 exports.searchUsers = async (searchTerm) => {
   try {
     const userList = await User.find({ userName: { $regex: searchTerm } });
