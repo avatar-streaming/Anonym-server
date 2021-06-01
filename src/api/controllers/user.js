@@ -8,7 +8,22 @@ exports.updateUserName = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      user,
+      payload: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateUserThumnail = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { thumnail } = req.body;
+    const { status, message, user } = await UserService.updateUserThumnail(id, thumnail);
+
+    res.status(status).json({
+      message,
+      payload: user,
     });
   } catch (err) {
     next(err);
@@ -22,7 +37,37 @@ exports.searchUsers = async (req, res, next) => {
 
     res.status(status).json({
       message,
-      userList,
+      payload: userList,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.followUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { targetID } = req.body;
+    const { status, message, currentUser } = await UserService.followUser(id, targetID);
+
+    res.status(status).json({
+      message,
+      payload: currentUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.unfollowUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { targetID } = req.body;
+    const { status, message, currentUser } = await UserService.unfollowUser(id, targetID);
+
+    res.status(status).json({
+      message,
+      payload: currentUser,
     });
   } catch (err) {
     next(err);

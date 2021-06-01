@@ -16,20 +16,21 @@ const userSchema = new Schema({
   userName: {
     type: String,
     lowercase: true,
-    unique: true,
     required: true,
   },
   thumnail: {
     type: String,
   },
-  follower: [{
+  followers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
-  following: [{
+  followings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   }],
 });
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;

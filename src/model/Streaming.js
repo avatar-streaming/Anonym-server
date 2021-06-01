@@ -21,4 +21,6 @@ const streamingSchema = new Schema({
   }],
 });
 
-module.exports = mongoose.model("Streaming", streamingSchema);
+const Streaming = mongoose.model("Streaming", streamingSchema);
+
+module.exports = Streaming;
