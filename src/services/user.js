@@ -17,10 +17,10 @@ exports.updateUserName = async (id, userName) => {
   }
 };
 
-exports.updateUserThumnail = async (id, userThumnail) => {
+exports.updateUserThumnail = async (id, thumnail) => {
   try {
     const filter = { _id: id };
-    const update = { userThumnail };
+    const update = { thumnail };
     const user = await User.findOneAndUpdate(filter, update, { new: true });
     await user.populate("followings", "userName thumnail").execPopulate();
 

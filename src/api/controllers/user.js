@@ -18,8 +18,8 @@ exports.updateUserName = async (req, res, next) => {
 exports.updateUserThumnail = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { userThumnail } = req.body;
-    const { status, message, user } = await UserService.updateUserThumnail(id, userThumnail);
+    const { thumnail } = req.body;
+    const { status, message, user } = await UserService.updateUserThumnail(id, thumnail);
 
     res.status(status).json({
       message,
