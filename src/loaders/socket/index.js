@@ -42,7 +42,7 @@ const createReceiverPeerConnection = (socket, streamerID, roomID) => {
       const dc = event.channel;
 
       dc.onmessage = (event) => {
-        streamings[roomID].detection = event.data;
+        streamings[roomID].image = event.data;
       };
     };
 
@@ -77,7 +77,7 @@ const createSenderPeerConnection = (viewerID, socket, roomID) => {
         const target = streamings[roomID];
 
         if (target) {
-          dc.send(target.detection);
+          dc.send(target.image);
         }
       };
     };
