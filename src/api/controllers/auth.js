@@ -38,7 +38,7 @@ exports.login = async (req, res, next) => {
       token,
     } = await AuthService.login(userInfo);
 
-    res.cookie("jwt", token);
+    res.cookie("jwt", token, { domain: "anonym/life" });
     res.status(status).json({
       message,
       payload: user,
