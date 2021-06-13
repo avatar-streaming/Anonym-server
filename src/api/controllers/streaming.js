@@ -2,7 +2,11 @@ const StreamingService = require("../../services/streaming");
 
 exports.getStreamings = async (req, res, next) => {
   try {
-    const { status, message, streamings } = await StreamingService.getStreamings();
+    const {
+      status,
+      message,
+      streamings,
+    } = await StreamingService.getStreamings();
 
     res.status(status).json({
       message,
@@ -35,7 +39,10 @@ exports.generateStreaming = async (req, res, next) => {
 exports.removeStreaming = async (req, res, next) => {
   try {
     const { id: streamingId } = req.params;
-    const { status, message } = await StreamingService.removeStreaming(streamingId);
+    const {
+      status,
+      message,
+    } = await StreamingService.removeStreaming(streamingId);
 
     res.status(status).json({
       message,
