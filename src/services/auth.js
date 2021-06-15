@@ -1,11 +1,9 @@
 const User = require("../model/User");
 const { generateToken, verifyToken } = require("../utils/tokenHelper");
 
-exports.checkAuth = async (bearerHeader) => {
+exports.checkAuth = async (token) => {
   try {
-    const bearer = bearerHeader.split(" ");
-    const bearerToken = bearer[1];
-    const decodedToken = await verifyToken(bearerToken);
+    const decodedToken = await verifyToken(token);
     const user = await User.findOne({ uid: decodedToken.uid }).populate("followings", "userName thumnail").lean();
     const now = Date.now();
     const isExpired = decodedToken.exp * 1000 - now < 0;

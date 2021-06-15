@@ -1,16 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-exports.generateToken = async (uid) => {
-  return jwt.sign(
-    {
-      uid,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    }
-  );
-};
+exports.generateToken = async (uid) => jwt.sign(
+  { uid },
+  process.env.JWT_SECRET,
+  { expiresIn: process.env.JWT_EXPIRES_IN },
+);
 
 exports.verifyToken = async (clientToken) => {
   if (!clientToken) {

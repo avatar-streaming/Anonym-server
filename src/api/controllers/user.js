@@ -4,7 +4,12 @@ exports.updateUserName = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { userName } = req.body;
-    const { status, message, user } = await UserService.updateUserName(id, userName);
+    const {
+      status,
+      message,
+      user
+
+    } = await UserService.updateUserName(id, userName);
 
     res.status(status).json({
       message,
@@ -19,7 +24,11 @@ exports.updateUserThumnail = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { thumnail } = req.body;
-    const { status, message, user } = await UserService.updateUserThumnail(id, thumnail);
+    const {
+      status,
+      message,
+      user,
+    } = await UserService.updateUserThumnail(id, thumnail);
 
     res.status(status).json({
       message,
@@ -33,7 +42,11 @@ exports.updateUserThumnail = async (req, res, next) => {
 exports.searchUsers = async (req, res, next) => {
   try {
     const { term } = req.query;
-    const { status, message, userList } = await UserService.searchUsers(term);
+    const {
+      status,
+      message,
+      userList,
+    } = await UserService.searchUsers(term);
 
     res.status(status).json({
       message,
@@ -48,7 +61,11 @@ exports.followUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { targetID } = req.body;
-    const { status, message, currentUser } = await UserService.followUser(id, targetID);
+    const {
+      status,
+      message,
+      currentUser,
+    } = await UserService.followUser(id, targetID);
 
     res.status(status).json({
       message,
@@ -63,7 +80,11 @@ exports.unfollowUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { targetID } = req.body;
-    const { status, message, currentUser } = await UserService.unfollowUser(id, targetID);
+    const {
+      status,
+      message,
+      currentUser,
+    } = await UserService.unfollowUser(id, targetID);
 
     res.status(status).json({
       message,

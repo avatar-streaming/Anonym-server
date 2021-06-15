@@ -3,7 +3,7 @@ const Streaming = require("../model/Streaming");
 exports.getStreamings = async () => {
   try {
     const streamings = await Streaming.find().limit(10).populate("streamer", "email userName thumnail").lean();
-
+    // .aggregate([{ $sample: { size: 10 }, $lookup: {} }]);
     return {
       status: 200,
       message: "Fetch Streamings Success",
