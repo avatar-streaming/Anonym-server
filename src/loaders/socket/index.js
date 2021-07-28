@@ -1,8 +1,8 @@
 const http = require("http");
+const { Server } = require("socket.io");
+const wrtc = require("wrtc");
 const app = require("../../app");
 const server = http.createServer(app);
-const wrtc = require("wrtc");
-const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -12,17 +12,17 @@ const io = new Server(server, {
 const receiverPCs = {};
 const senderPCs = {};
 const streamings = {};
-const pc_config = {
-  "iceServers": [
+const pcConfig = {
+  iceServers: [
     {
       urls: "stun:stun.l.google.com:19302",
-    }
+    },
   ],
 };
 
 const createReceiverPeerConnection = (socket, streamerID, roomID) => {
   try {
-    const pc = new wrtc.RTCPeerConnection(pc_config);
+    const pc = new wrtc.RTCPeerConnection(pcConfig);
     receiverPCs[streamerID] = pc;
 
     pc.onicecandidate = (event) => {
@@ -38,11 +38,11 @@ const createReceiverPeerConnection = (socket, streamerID, roomID) => {
       };
     };
 
-    pc.ondatachannel = (event) => {
-      const dc = event.channel;
+    pc.ondatachannel = (ChannelEvent) => {
+      const dc = ChannelEvent.channel;
 
-      dc.onmessage = (event) => {
-        streamings[roomID].image = event.data;
+      dc.onmessage = (messageEvent) => {
+        streamings[roomID].image = messageEvent.data;
       };
     };
 
@@ -54,7 +54,7 @@ const createReceiverPeerConnection = (socket, streamerID, roomID) => {
 
 const createSenderPeerConnection = (viewerID, socket, roomID) => {
   try {
-    const pc = new wrtc.RTCPeerConnection(pc_config);
+    const pc = new wrtc.RTCPeerConnection(pcConfig);
     senderPCs[viewerID] = pc;
 
     pc.onicecandidate = (event) => {
@@ -66,14 +66,14 @@ const createSenderPeerConnection = (viewerID, socket, roomID) => {
 
     const targetStreaming = streamings[roomID];
 
-    targetStreaming.stream.getTracks().forEach(track => {
+    targetStreaming.stream.getTracks().forEach((track) => {
       pc.addTrack(track, targetStreaming.stream);
     });
 
     pc.ondatachannel = (event) => {
       const dc = event.channel;
 
-      dc.onmessage = (event) => {
+      dc.onmessage = () => {
         const target = streamings[roomID];
 
         if (target) {
